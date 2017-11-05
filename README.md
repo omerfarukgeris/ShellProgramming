@@ -1,0 +1,2 @@
+# ShellProgramming
+Basit Kabuk Uygulaması
