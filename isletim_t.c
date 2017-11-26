@@ -112,10 +112,11 @@ int cntrl_param(){
 
 		}
 		
-	}	
+	}else{
+
 		run_command(cmd,param,flag);
-	
-	}
+	}	
+}
 	
 
 
@@ -128,11 +129,9 @@ int run_command(char *cmd, char *param[],int flag){
 	child=malloc(sizeof(struct Child*));
 	Children[digit_child++]=child;
 	
-	if ((child->pid=fork() )> 0)
-	{
-		pid=wait(&status);
-		int exstat = WEXITSTATUS(status);
-		//printf("%d-%d-%d",pid,status,exstat);	
+	if((child->pid=fork())<0){
+		printf("ERROR _child process failed\n");
+        exit(1); 
 	}
 	else if(child->pid==0){
 			
@@ -143,19 +142,21 @@ int run_command(char *cmd, char *param[],int flag){
 			exit(1);
 		}
  	
-	}else if((child->pid=fork())<0){
-		printf("ERROR _child process failed\n");
-        exit(1); 
-	}else{
+	}else if((child->pid=fork() )> 0)
+	{
+		pid=wait(&status);
+		int exstat = WEXITSTATUS(status);
+		//printf("%d-%d-%d",pid,status,exstat);	
+	}
 			
 		
 		
-	}
-	 
 }
+	 
+
 	
 int write_file(char *cmd, char *param[],char *opr,char * file){
-	 //printf("cmd=%s.param1=%s.param2=%s\n",cmd,param[0],param[1]);
+	  
 	
 	 
 	struct Child *child;
@@ -192,19 +193,16 @@ int write_file(char *cmd, char *param[],char *opr,char * file){
 			
 
 	}else{
-
-		//while(waitpid(child->pid, &status, WNOHANG)!=child->pid);
+ 
 		
 		pid=wait(&status);
 		int exstat = WEXITSTATUS(status);
-		printf("%d-%d-%d",pid,status,exstat);	
+		//printf("%d-%d-%d",pid,status,exstat);	
 	}
 }
 	
 int read_file(char *cmd, char *param[],char *opr,char * file){
-	 //printf("cmd=%s.param1=%s.param2=%s\n",cmd,param[0],param[1]);
-	
-	printf("read_file");
+	 
 	struct Child *child;
 
 	int fd ,pid;
@@ -242,7 +240,7 @@ int read_file(char *cmd, char *param[],char *opr,char * file){
 			
 		pid=wait(&status);
 		int exstat = WEXITSTATUS(status);
-		printf("%d-%d-%d",pid,status,exstat);	
+		//printf("%d-%d-%d",pid,status,exstat);	
 
 	}
 	
@@ -252,16 +250,7 @@ int read_file(char *cmd, char *param[],char *opr,char * file){
 
 }
 
-void child_kill(){
-
-	for(int i=0;i<digit_child;i++){
-		printf("%d",Children[i]->pid);
-		waitpid(Children[i]->pid);
-	}
-
-}
-
-//int background
+ 
 
 int main(int argc, char *arg[]){
 
@@ -277,13 +266,15 @@ int main(int argc, char *arg[]){
 		 
 
 
-	//child_kill();		
+	 	fflush(stdin);
 		fgets(input, 50, stdin);
 		
-		if(strcmp=="")continue;
-		cntrl(input);
-		cntrl_param();
-		 
+		if(strcmp(input,"\n")!=0 ){
+			
+			cntrl(input);
+			cntrl_param();
+			
+		}
 		
 		
 
@@ -291,7 +282,7 @@ int main(int argc, char *arg[]){
 		printf("\e[1m\e[32mshell>\e[0m");
 		
 	}
-	//for(int i=0 ; i< digit_input;i++) printf("%s\n",list[i]);
+	 
 	
 return 0;
 }
