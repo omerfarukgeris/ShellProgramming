@@ -1,0 +1,10 @@
+a
+A
+aa
+as
+b
+c
+i
+isletim.c
+main.c
+pro.c

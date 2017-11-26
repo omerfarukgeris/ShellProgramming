@@ -1,0 +1,15 @@
+total 64
+drwxr-xr-x 3 ubuntu ubuntu  4096 Kas 26 14:22 .
+drwxr-xr-x 3 ubuntu ubuntu  4096 Kas 25 01:15 ..
+-rw------- 1 ubuntu ubuntu     5 Kas 26 14:21 a
+-rw------- 1 ubuntu ubuntu     0 Kas 26 14:22 A
+-rw------- 1 ubuntu ubuntu    12 Kas 25 15:54 aa
+-rw------- 1 ubuntu ubuntu     0 Kas 25 01:55 as
+-rw------- 1 ubuntu ubuntu   665 Kas 26 14:20 b
+-rw------- 1 ubuntu ubuntu     6 Kas 25 16:02 c
+drwxr-xr-x 8 ubuntu ubuntu  4096 Kas 24 22:36 .git
+-rw-r--r-- 1 ubuntu ubuntu   430 Kas 24 16:26 .gitignore
+-rwxr-xr-x 1 ubuntu ubuntu 13976 Kas 26 14:22 i
+-rw-r--r-- 1 ubuntu ubuntu  4478 Kas 26 14:22 isletim.c
+-rw-r--r-- 1 ubuntu ubuntu     0 Kas 24 19:47 main.c
+-rw-r--r-- 1 ubuntu ubuntu  8167 Kas 24 19:53 pro.c

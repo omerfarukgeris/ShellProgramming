@@ -5,13 +5,16 @@
 #include "sys/types.h"
 #include "unistd.h"
 #include "string.h"
+#include "fcntl.h"
 int digit_command=5;
-char *commands[]={"","ls","cat","echo","file","\0"};
+char *commands[]={"","ls","cat","echo","file","sleep","id","\0"};
 
-char *operators[]={"<",">","&","|",";"};
+char *operators[]={"<",">","|",";"};
 char *list[20];
 const char *quit="quit";
 const char *s=">";
+const char *b="<";
+const char *amb="&";
 
 int status;
 int digit_input;
@@ -26,7 +29,8 @@ int digit_child=0;
 void cntrl(char []);
 void cntrl_param();
 int run_command(char *cmd,char *params[]);
-
+int write_file(char *cmd,char *params[],char *, char *);
+int read_file(char *cmd,char *params[],char *, char *);
 
 void cntrl( char input[]){	
 	
@@ -34,6 +38,7 @@ void cntrl( char input[]){
 	int i=0;
 	
 	for(int i=0 ;i<strlen(input);i++){
+		
 		if(input[i]==' ' || input[i]=='\n'){
 			char *tmp;
 			tmp=malloc(sizeof(char*)*1);
@@ -53,35 +58,37 @@ void cntrl_param(){
 	cmd=malloc(sizeof(char*));
 	char *param[20];
 	*param=malloc(sizeof(char*)*20);
+	char *param2[20];
+	*param2=malloc(sizeof(char*)*20);
 	char *opr[20];
+	int flag=0;
+	
 	int k=0,l=0,m=0;
+	int digit_opr=0;
 
-	for (int i = 0; i < digit_input; ++i)
+	for (int i = 0; i < digit_input; i++)
 	{	
-		for (int j = 0; j < sizeof(commands)/(sizeof(char *)) ; ++j)
+		for (int j = 0; j < sizeof(commands)/(sizeof(char *)) ; j++)
 		{	
 			if(strcmp(list[i],quit)==0){
-				exit(0);;
+				
+				exit(0);
 			}
 			else if (strcmp(list[i],commands[j])==0)
 			{
 				cmd=commands[j];
 			}else if(strcmp(operators[j],list[i])==0){
 				opr[m++]=operators[j];
-				printf("%s",operators[j]);
-				if(strcmp(operators[j],s)==0){
-					printf("as");
-					if(strlen(list[i+1])!=0){
-
-					}else{
-						printf("Erorr Newline");
-					}
-				}
-
+				digit_opr++; 
+				if(*operators=="&") flag=1; 
+				break;
 				
-			}else if(strcmp(param[k-1],list[i])!=0 ){
-				param[k++]=list[i];
-					printf("aq");
+			}else if(strcmp(param[k-1],list[i])!=0 && strcmp(list[i],s)!=0 && strcmp(list[i],b)!=0) {
+				if(digit_opr<1){
+					param[k++]=list[i];
+				}else{
+					param2[l++]=list[i];
+				}
 			}
 
 
@@ -89,12 +96,26 @@ void cntrl_param(){
 	}
 	
 	param[k]=NULL;
-	run_command(cmd,param);
-	
+	if(digit_opr>0){
+		if (*opr[0]=='>')
+		{
+			write_file(cmd,param,*opr,*param2);
+		}else if(*opr[0]=='<'){
+			read_file(cmd,param,opr[0],param2[0]);
+		}else if(flag==1){
+
+
+
+		}
+		
+	}else{
+		run_command(cmd,param);
+	}
 	
 }
 
 int run_command(char *cmd, char *param[]){
+	printf("run");
 	 //printf("cmd=%s.param1=%s.param2=%s\n",cmd,param[0],param[1]);
 	struct Child *child;
 	 
@@ -112,32 +133,129 @@ int run_command(char *cmd, char *param[]){
 			exit(1);
 		}
 
+		
 	}else{
+			
 		while (wait(&status) != child->pid);
+		printf("%d",status);
 	}
+}
+	
+int write_file(char *cmd, char *param[],char *opr,char * file){
+	 //printf("cmd=%s.param1=%s.param2=%s\n",cmd,param[0],param[1]);
+	
+	printf("write_file");
+	struct Child *child;
+	int fd;
+	int p[2];
+	pipe(p);
+	child=malloc(sizeof(struct Child*));
+	Children[digit_child++]=child;
 	
 
+	
+			
+	
+	if((child->pid=fork())<0){
+		printf("\e[31m\e[1mERROR _child process failed\n\e[1m");
+        exit(1);	
+	}else if(child->pid==0){
+		 close(1);
+	
+			if(fd=open(file,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR)<0){
+				perror("Error File open\n");
+				exit(EXIT_FAILURE);
+			}
+			dup2(fd,0);
+			
+			
+			
+		if(execvp(cmd,param)<0){
+			
+			printf("\e[1m\e[32mERROR _exec failed\n\e[0m");
+			exit(1);
+		}
+		
+			
+			exit(3);
+
+	}else{
+
+		//while(waitpid(child->pid, &status, WNOHANG)!=child->pid);
+		
+		pid=wait(&status);
+		int exstat = WEXITSTATUS(status);
+		printf("%d-%d-%d",pid,status,exstat);	
+	}
+}
+	
+int read_file(char *cmd, char *param[],char *opr,char * file){
+	 //printf("cmd=%s.param1=%s.param2=%s\n",cmd,param[0],param[1]);
+	
+	printf("read_file");
+	struct Child *child;
+	int fd;
+	
+
+	child=malloc(sizeof(struct Child*));
+	Children[digit_child++]=child;
+	
+
+	
+			
+	
+	if((child->pid=fork())<0){
+		printf("\e[31m\e[1mERROR _child process failed\n\e[1m");
+        exit(1);	
+	}else if(child->pid==0){
+		 close(0);
+		
+			if(fd=open(file,O_RDONLY)<0){
+				perror("Error File open\n");
+				exit(EXIT_FAILURE);
+			}
+			dup2(fd,0);
+			
+			
+			 
+		if(execvp(cmd,param)<0){
+			
+			printf("\e[1m\e[32mERROR _exec failed\n\e[0m");
+			exit(1);
+		}
+			close(0);
+
+	}else{
+			
+		while (wait(&status) != child->pid);
+
+	}
+	
 	
 
 
 
 }
 
+//int background
+
 int main(int argc, char *arg[]){
+
 	
 	*list=malloc(sizeof(char*)*20);
-	printf("shell>");
+	printf("\e[1m\e[32mshell>\e[0m");
 	while(1){
 		digit_input=0;
 	
 	
 		char input[50];
 		
-		
-		
+		 
+
 		
 		fgets(input, 50, stdin);
 		
+	
 		cntrl(input);
 		cntrl_param();
 		 
@@ -145,8 +263,7 @@ int main(int argc, char *arg[]){
 		
 
 
-		printf("shell>");
-	
+		printf("\e[1m\e[32mshell>\e[0m");
 	}
 	//for(int i=0 ; i< digit_input;i++) printf("%s\n",list[i]);
 	
