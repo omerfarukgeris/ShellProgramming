@@ -128,13 +128,10 @@ int run_command(char *cmd, char *param[],int flag){
 	child=malloc(sizeof(struct Child*));
 	Children[digit_child++]=child;
 	
-	if ((child->pid=fork() )> 0)
-	{
-		pid=wait(&status);
-		int exstat = WEXITSTATUS(status);
-		//printf("%d-%d-%d",pid,status,exstat);	
-	}
-	else if(child->pid==0){
+	if((child->pid=fork())<0){
+		printf("ERROR _child process failed\n");
+        exit(1); 
+	}else if(child->pid==0){
 			
 		
 		if(execvp(cmd,param)<0){
@@ -143,14 +140,13 @@ int run_command(char *cmd, char *param[],int flag){
 			exit(1);
 		}
  	
-	}else if((child->pid=fork())<0){
-		printf("ERROR _child process failed\n");
-        exit(1); 
-	}else{
-			
+	}else if ((child->pid=fork() )> 0){
+		pid=wait(&status);
+		int exstat = WEXITSTATUS(status);
+		//printf("%d-%d-%d",pid,status,exstat);	
+	}	
 		
-		
-	}
+	
 	 
 }
 	
@@ -197,7 +193,7 @@ int write_file(char *cmd, char *param[],char *opr,char * file){
 		
 		pid=wait(&status);
 		int exstat = WEXITSTATUS(status);
-		printf("%d-%d-%d",pid,status,exstat);	
+		//printf("%d-%d-%d",pid,status,exstat);	
 	}
 }
 	
@@ -268,6 +264,7 @@ int main(int argc, char *arg[]){
 	 
 	*list=malloc(sizeof(char*)*20);
 	printf("\e[1m\e[32mshell>\e[0m");
+	
 	while(1){
 		digit_input=0;
 	
@@ -276,11 +273,11 @@ int main(int argc, char *arg[]){
 		
 		 
 
-
+		fflush(stdout);
 	//child_kill();		
 		fgets(input, 50, stdin);
 		
-		if(strcmp=="")continue;
+		
 		cntrl(input);
 		cntrl_param();
 		 
